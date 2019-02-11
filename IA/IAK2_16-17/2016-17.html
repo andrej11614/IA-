@@ -1,0 +1,199 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+	<title>Password Strength Meter</title>
+	<link rel="stylesheet" href="jquery/jquery-ui.min.css" />
+	<link rel="stylesheet" href="jquery/jquery-ui.theme.min.css" />
+	<style>
+	body{
+		font-family: Helvetica;
+	}
+	.item-details{
+		list-style-type:none;
+		padding: 20px;
+		margin:10px;
+		text-align:center;
+		cursor:pointer;
+		
+	}
+	.item-details:hover{
+		background: gray;
+	}
+	#bookholder,#stats{
+		border: 1px solid black;
+		width:300px;
+		height:400px;
+		text-align:center;
+		padding:0;
+		overflow:scroll;
+		position:relative;
+	}
+	#bookholder{
+		left:250px;
+		bottom:50px;
+	}
+	#stats{
+		left:600px;
+		bottom:468.5px;
+		overflow-wrap: break-word;
+	}
+	#btn{
+
+		position:relative;
+		bottom:780px;
+	}
+	.clicked{
+		background: gray;
+	}
+	#footer{
+		position:relative;
+		bottom:470px;
+		left:265px;
+	}
+	#footer ul{
+		list-style-type:none;
+		display:flex;
+		flex-direction:row;
+	}
+	#footer ul li{
+		padding: 0 10px;
+		cursor:pointer;
+	}
+	</style>
+</head>
+<body>
+	<div>
+		<input type="text" placeholder="ISBN"/>
+		<p>Vnesete 10 ili 13 cifren broj</p>
+		<ul id="bookholder">
+		</ul>
+		<div id="stats">
+		</div>
+		<button id="btn">
+		Add book
+		</button>
+	</div>
+	<footer id="footer">
+		<ul id="links">
+			<li><a href="#"><img src="images/delicious.png"></img></a></li>	
+			<li><a><img src="images/digg.png"></img></a></li>		
+			<li><a><img src="images/facebook.png"></img></a></li>
+			<li><a><img src="images/flickr.png"></img></a></li>	
+			<li><a><img src="images/linkedin.png"></img></a></li>	
+			<li><a><img src="images/reddit.png"></img></a></li>		
+			<li><a><img src="images/rss.png"></img></a></li>
+			<li><a><img src="images/twitter.png"></img></a></li>				
+
+		</ul>
+	</footer>
+	<script src="jquery/jquery.js"></script>
+	<script src="jquery/jquery-ui.js"></script>
+	<script>
+	var books=[];
+	var alreadyAdded=[];
+	$("#btn").on("click", ()=>{
+		var isbn=$("input").val();
+		if(isbn.length!=10&&$("input").val().length!=13) return;
+		//else continue with procedure
+		
+		$.ajax({
+	
+		url : "https://openlibrary.org/api/books?bibkeys=ISBN:"+isbn+"&jscmd=details&callback=mycallback",
+		method: "GET",
+		dataType: "jsonP",
+		success: data=>{
+			try {
+			var flag=true;
+			var $title=data["ISBN:"+isbn].details.title;
+			var $isbn= isbn.length==10?
+			data["ISBN:"+isbn].details.isbn_10[0]:data["ISBN:"+isbn].details.isbn_13[0];
+			var $thumbnail_url=data["ISBN:"+isbn].thumbnail_url;
+			var $info_url=data["ISBN:"+isbn].info_url;
+			var $publishers=[];
+			$publishers.push(data["ISBN:"+isbn].details.publishers);
+			var obj={
+				'title': $title,
+				'isbn': $isbn,
+				'thumbnail_url' : $thumbnail_url, 
+				'info_url' : $info_url, 
+				'publishers' : $publishers
+			};
+			//if(books.indexOf())
+			$.each(books, (index,item)=>{
+				if(item.title.localeCompare($title)==0){ //dont add this obj twice!
+					flag=false;
+					return false;
+				}
+			});
+			if(flag){
+			$("<li class='item-details'>"+$title+'</li>').appendTo($("#bookholder"));
+			alreadyAdded.push(false);
+			console.log(alreadyAdded);
+			console.log(data);
+			console.log(obj);
+			books.push(obj);
+			console.log(books);
+					//console.log($(".item-details").length);	
+		}
+		}
+		catch(err){
+			alert("unable to find book!\nplease enter valid number");
+		}
+	}
+	})
+	});
+	$(document).on("click", ".item-details", event=>{
+		//console.log("Works"+event.pageX);
+		var n=$("#bookholder").children().length;
+		var k=-1;
+		
+		
+	//	var index=event.target.index;
+		//var index=$("#bookholder li").index(this);
+		//$(this).addClass("clicked");
+		//console.log(index);
+		var elem=$($(event.target));
+		elem.siblings().removeClass("clicked");
+		elem.addClass("clicked");
+		var titleName=elem.text();
+		for(var i=0;i<n;i++){
+			if(titleName.localeCompare(books[i].title)==0){
+				k=i;
+				break;
+			}
+		}
+		console.log(k);
+		if(k!=-1&&alreadyAdded[k]==false){
+		//	$("<img src="books[k]"></img>");
+			$("<div><br/>ISBN:"+books[k].isbn+
+			"<br/> info_url: <a href="+books[k].info_url+">Link</a>"+
+			"<br/> Publisher: "+books[k].publishers[0]+"<br/></div>")
+			.appendTo($("#stats"));
+			//if( titleName.thumbnail_url==='undefined'){
+			//console.log(" undefined"); 
+			alreadyAdded[k]=true;
+		}
+		
+		
+		
+		/*if(books.length==0) return;
+		$.each(books, (i,elem)=>{
+			
+		});*/
+	});
+	
+		 $("#links").find("li").hover(
+            function () {
+                $(this).animate({
+                    opacity: 0.3
+                }, 500);
+            }, function () {
+                $(this).animate({
+                    opacity: 1
+                }, 500);
+            }
+        );
+		
+	</script>
+</body>
+</html>	

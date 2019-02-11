@@ -1,0 +1,120 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+	<title>Password Strength Meter</title>
+	<link rel="stylesheet" href="jquery/jquery-ui.min.css" />
+	<link rel="stylesheet" href="jquery/jquery-ui.theme.min.css" />
+	<style>
+	body{
+		text-align:center;
+	}
+	div{
+		display:inline-block;
+		height:400px;
+		width:300px;
+		max-width:300px;
+		border:2px solid black;
+		
+		overflow:scroll;
+	}
+	div ul li{
+		list-style-type:none;	
+	}
+	#stats{
+		border:2px solid black;
+		overflow:hidden;
+	}
+	
+	
+ ul .ui-selecting { background: #FECA40; }
+  ul .ui-selected { background: #F39814; color: white; }
+ ul { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+  ul li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+	
+	</style>
+</head>
+<body>
+	<div>
+		<h3>2016</h3>
+		<ul id="first">
+			
+		</ul>
+	</div>
+	<div>
+		<h3>2017</h3>
+		<ul  id="second">
+			
+		</ul>
+	</div>
+	<div>
+		<h3>Favorites</h3>
+		<ul  id="third"> 
+			<li class="ui-widget-content"></li>
+		</ul>
+	</div>
+	<div id="stats">
+	
+	</div>
+
+<script src="jquery/jquery.js"></script>
+<script src="jquery/jquery-ui.js"></script>
+<script>
+	$(function(){
+		var arr=[];
+		$("#first").sortable({
+			connectWith: "#third",
+			
+		});
+		$("#second").sortable({
+			connectWith: "#third"
+		});
+		$("#third").sortable({
+			connectWith: "#first",
+			connectWith: "#second"
+		});
+		$("#third").on("click","li", function(e){
+			$("#stats").html(e.pageX+" "+e.pageY);
+		});
+	
+	
+		$.ajax({
+			url: "http://ergast.com/api/f1/2016/drivers.json",
+			method: "GET",
+			dataType: "jsonP"
+		
+		}).done(function(data){
+			console.log(data);
+			for(var i=0;i<data.MRData.DriverTable.Drivers.length;i++){
+				var name=data.MRData.DriverTable.Drivers[i].givenName;
+				var surname=data.MRData.DriverTable.Drivers[i].familyName;
+				var $li="<li class=\"ui-widget-content\">"+name+" "+surname
+					+"</li>"
+				
+				$("#first").append($li);		
+			}
+		
+		});
+		$.ajax({
+			url: "http://ergast.com/api/f1/2017/drivers.json",
+			method: "GET",
+			dataType: "jsonP"
+		
+		}).done(function(data){
+			for(var i=0;i<data.MRData.DriverTable.Drivers.length;i++){
+				var name=data.MRData.DriverTable.Drivers[i].givenName;
+				var surname=data.MRData.DriverTable.Drivers[i].familyName;
+				var $li="<li class=\"ui-widget-content\">"+name+" "+surname
+					+"</li>"
+				
+				$("#second").append($li);		
+			}
+		
+		});
+	
+	
+	});
+</script> 
+</body>
+</html>
+	
+	

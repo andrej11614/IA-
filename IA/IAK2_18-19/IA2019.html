@@ -1,0 +1,227 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+	<title>Password Strength Meter</title>
+	<link rel="stylesheet" href="jquery/jquery-ui.min.css" />
+	<link rel="stylesheet" href="jquery/jquery-ui.theme.min.css" />
+	<style>
+	body{
+		text-align:center;
+	}
+	div{
+	width:300px;
+	max-width:300px;
+	height:400px;
+	border:2px solid black;
+	display:inline-block;
+	overflow:scroll;
+	text-align:center;
+	}
+	ul{
+	margin:0 0 0 0;
+	width:900px;	
+	}
+	ul li{
+	width:152%;
+	
+	}
+	
+	ul .ui-selecting { background: #FECA40; }
+	ul .ui-selected { background: #F39814; color: white; }
+	ul { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	ul li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px;}
+	
+	
+	</style>
+</head>
+<body>
+	<div>
+		<ul id="first">
+			<li class="ui-widget-content">2010</li>
+			<li class="ui-widget-content">2011</li>
+			<li class="ui-widget-content">2012</li>
+			<li class="ui-widget-content">2013</li>
+			<li class="ui-widget-content">2014</li>
+			<li class="ui-widget-content">2015</li>
+			<li class="ui-widget-content">2016</li>
+			<li class="ui-widget-content">2017</li>
+		</ul>
+	</div>
+	<div>
+		<ul id="second">
+		</ul>
+	</div>
+	
+<script src="jquery/jquery.js"></script>
+<script src="jquery/jquery-ui.js"></script>
+<script>
+	
+		var drivers=[];
+		var to;	
+	$("#first").selectable({
+		selected:function(event,ui){
+			//$("#second").selectable("instance");
+			$(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+			search();
+		}
+	});
+	function funct(){
+	$("#second").selectable({
+		selected: function(event,ui){
+			
+			$(ui.selected).addClass("ui-selected").siblings().removeClass("ui-selected");
+			//if($(".ui-selected").is("button")) alert(22);
+			displayPersonStats();
+		}
+	});
+	}
+	$(".btn").on("click", function(){
+		console.log(223);
+	
+	});
+	
+	
+	//var $first=$("#first");
+	//var $second=$("#second");
+	
+	const search=()=>{
+		$.each($("#first>li"),function(i,item){
+			if($(this).hasClass("ui-selected")){
+				 to=$(this).text();
+				display(to);
+			}	
+		})
+	};	
+	
+	const display = to =>{
+		
+		$("#second").empty();
+		//drivers=null;
+		funct();
+		$.ajax({
+		method: "GET",
+		dataType: "json",	
+		url: "http://ergast.com/api/f1/"+to+"/drivers.json",
+		
+		success: function(data){
+			//drivers=new Array(data.MRData.DriverTable.Drivers.length);
+			drivers=[];
+			$.each(data.MRData.DriverTable.Drivers,function(i,item){	
+				//alert(item.givenName);
+				var obj = {
+					givenName: item.givenName.toString(),
+					familyName: item.familyName.toString(),
+				};
+				//obj["01"]=item.driverId;
+				/*drivers = [
+					'1': obj = {
+						val: "tet"
+						}
+				]*/
+				/*drivers.push({
+					key:"avxs"
+				});*/
+				drivers.push(item);
+				
+				
+				//drivers.push(obj);
+				//document.write(drivers[0]);
+				
+				var $li="<li class=\"ui-widget-content\">"+item.givenName+" "+item.familyName+"</li>"
+				$("#second").append($li);
+				
+			});
+			//alert(drivers[0].givenName);
+		}
+		});	
+	}
+	
+	const displayPersonStats = () =>{
+		$.each($("#second>li"),function(i,item){
+			if($(this).hasClass("ui-selected")){
+				var player=$(this).text().split(" ",1);
+				
+				/*var ar=[];
+				var obj={
+					name: "John"
+				}
+				ar.push(obj);
+				//alert(ar.length);*/
+				
+				//var n=parseInt(find(player));
+				//var n=find(player);
+				//alert(find(player));
+				var k;
+				$.each(drivers,function(i,item){
+				 
+				var a=String(item.givenName);
+				var b=String(player);
+				if(a===b){
+					k=parseInt(i);
+					return false;	
+				}	
+				//alert(i);
+				//document.write(item.givenName+" ");
+		});
+				//console.log(k);
+				if(k!==undefined){
+					//var a=$("#second");	
+					//alert(a":nth-child(1)");
+					var n=$("#second").children().length;
+					var arr=[];
+					for(var i=0;i<n;i++){
+						//console.log($("#second>li").get(i));
+						let $li=$("#second>li").get(i);
+						//console.log($li);	
+						arr.push($li);
+					}
+					console.log(arr[0]);
+					//console.log();
+					$("#second").selectable("destroy");
+					var button=$('<input/>').attr({ type: 'button', name:'btn1', value:'BACK', class: "btn"});
+					$("#second").html("Name: "+drivers[k].givenName+" "+drivers[k].familyName+"<br/>"+"Date of birth "+drivers[k].dateOfBirth+"<br/>"+"<br/>"+"<br/>")
+					.append(button);
+					$("#second").on("click", "input", function(){
+						$("#second").html("");
+						funct();
+						$.each(arr,function(i,item){
+							
+							$("#second").append(item);
+						
+						});
+					
+					});
+				}
+			}	
+		})
+	};
+	/*const find=player=>{
+		//alert(player);
+		$.each(drivers,function(i,item){
+			var k=parseInt(i);
+			var a=String(item.givenName);
+			var b=String(player);
+			if(a===b)	return Number(k);	
+			
+			//console.log(k);	
+			
+				//alert(i);
+				//document.write(item.givenName+" ");
+		});	
+	};*/
+	
+	/*$(function(){
+		$.ajax({
+		method: "GET",
+		dataType: "json",	
+		url: ""
+		
+	
+	
+	});	
+	
+	});*/
+	
+</script>
+</body>
+</html>
